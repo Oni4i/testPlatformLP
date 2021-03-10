@@ -77,4 +77,57 @@ insertNewsRow($dbh, [time()]);
 Оцените время на деплой релиза и на откат изменений.
 Как Вы организовали бы деплой изменений в бд?
 
-резервный сервер с бэкапом предыдущей версии релиза и бэкапом базы данных. Если это микросервисы с малым количеством запросов, то можно временно на него повесить ответы на запросы. Если нет то пересоздать базу данных и залить на нее бэкап.
+Резервный сервер с бэкапом предыдущей версии релиза и бэкапом базы данных. Если это микросервисы с малым количеством запросов, то можно временно на него повесить ответы на запросы. Если нет то пересоздать базу данных и залить на нее бэкап.
+
+### Сортировка
+На входе есть одномерный массив вида [‘asd’,’qwe’,’sda’,’wqe’,’dsa’,’qwer’,’afds’,’zxc’]
+Требуется массив сгруппировать по группам слов состоящих из одних и тех же букв.
+Пример правильного ответа:
+[
+[‘asd’,’sda’,’dsa’],
+[‘qwe’,’wqe’],
+[‘qwer’],
+[‘afds],
+[‘zxc’]
+]
+
+```php
+$array = ['asd','qwe','sda','wqe','dsa','qwer','afds','zxc'];
+
+$result = [];
+foreach ($array as $word) {
+    $letters = array_reduce(str_split($word), function ($arr, $letter) {
+        return [$letter => $arr[$letter] + 1] + $arr;
+    }, []);
+
+    if ($result) {
+
+        $isFind = false;
+        foreach ($result as &$combination) {
+            if (!$isFind &$combination['letters'] == $letters) {
+                $combination['words'][] = $word;
+                $isFind = true;
+            }
+        }
+
+        if (!$isFind) {
+            $result[] = [
+                'letters' => $letters,
+                'words' => [$word]
+            ];
+        }
+
+    } else {
+        $result[] = [
+            'letters' => $letters,
+            'words' => [$word]
+        ];
+    }
+}
+
+$wordGroups = array_map(function ($element) {
+    return $element['words'];
+}, $result);
+
+print_r($wordGroups);
+```
